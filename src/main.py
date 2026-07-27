@@ -9,6 +9,7 @@ from auditor_ia import generar_reporte_auditoria
 from extractor_local import (
     ContribuyenteExogena,
     extraer_texto_pdf_bytes,
+    extraer_texto_xlsx_bytes,
     leer_texto_plano,
     texto_a_estructura,
 )
@@ -149,17 +150,28 @@ async def procesar_pdf(
     gmf_pagado_anual: float = Form(0.0),
 ) -> CalcularRentaResponse:
     nombre_archivo = (archivo.filename or "").lower()
+    xlsx_content_types = (
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-excel",
+    )
     es_pdf = nombre_archivo.endswith(".pdf") or archivo.content_type == "application/pdf"
     es_txt = nombre_archivo.endswith(".txt") or archivo.content_type == "text/plain"
+    es_xlsx = nombre_archivo.endswith(".xlsx") or archivo.content_type in xlsx_content_types
 
-    if not es_pdf and not es_txt:
+    if not es_pdf and not es_txt and not es_xlsx:
         raise HTTPException(
-            status_code=400, detail="El archivo debe ser un PDF o un archivo de texto plano (.txt)"
+            status_code=400,
+            detail="El archivo debe ser un PDF, un Excel (.xlsx) o un archivo de texto plano (.txt)",
         )
 
     contenido = await archivo.read()
     try:
-        texto = leer_texto_plano(contenido) if es_txt else extraer_texto_pdf_bytes(contenido)
+        if es_xlsx:
+            texto = extraer_texto_xlsx_bytes(contenido)
+        elif es_txt:
+            texto = leer_texto_plano(contenido)
+        else:
+            texto = extraer_texto_pdf_bytes(contenido)
     except Exception as exc:
         raise HTTPException(status_code=400, detail=f"No se pudo leer el archivo: {exc}") from exc
 

@@ -141,7 +141,7 @@
           : 'border-white/10 hover:border-white/20'"
         class="relative rounded-2xl border border-dashed px-8 py-12 text-center transition-all duration-200 glass"
       >
-        <input type="file" accept=".pdf,application/pdf,.txt,text/plain" class="hidden" x-ref="fileInput" @change="onFileSelected($event)" />
+        <input type="file" accept=".pdf,application/pdf,.txt,text/plain,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="hidden" x-ref="fileInput" @change="onFileSelected($event)" />
 
         <template x-if="!fileName">
           <div class="flex flex-col items-center gap-3">
@@ -155,7 +155,7 @@
             <p class="text-[12.5px] text-neutral-500">
               o
               <button @click="$refs.fileInput.click()" class="font-medium text-emerald-400 hover:text-emerald-300 underline underline-offset-2">
-                selecciona un archivo PDF o TXT
+                selecciona un archivo PDF, TXT o Excel
               </button>
             </p>
           </div>
@@ -356,19 +356,20 @@ function dropzone() {
       aplica_renta_exenta_laboral_25: true,
     },
 
-    esPdfOTxt(file) {
+    esArchivoValido(file) {
       const nombre = file.name.toLowerCase();
-      return nombre.endsWith('.pdf') || nombre.endsWith('.txt')
-        || file.type === 'application/pdf' || file.type === 'text/plain';
+      return nombre.endsWith('.pdf') || nombre.endsWith('.txt') || nombre.endsWith('.xlsx')
+        || file.type === 'application/pdf' || file.type === 'text/plain'
+        || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     },
     onDrop(e) {
       this.dragging = false;
       const file = e.dataTransfer.files?.[0];
-      if (file && this.esPdfOTxt(file)) this.setFile(file);
+      if (file && this.esArchivoValido(file)) this.setFile(file);
     },
     onFileSelected(e) {
       const file = e.target.files?.[0];
-      if (file && this.esPdfOTxt(file)) this.setFile(file);
+      if (file && this.esArchivoValido(file)) this.setFile(file);
     },
     refreshIcons() {
       this.$nextTick(() => lucide.createIcons());

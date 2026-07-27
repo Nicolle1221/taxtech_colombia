@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from anthropic import Anthropic
+from openpyxl import load_workbook
 from pydantic import BaseModel
 from pypdf import PdfReader
 from supabase import create_client
@@ -61,6 +62,18 @@ def leer_texto_plano(contenido: bytes) -> str:
         return contenido.decode("utf-8")
     except UnicodeDecodeError:
         return contenido.decode("latin-1")
+
+
+def extraer_texto_xlsx_bytes(contenido: bytes) -> str:
+    libro = load_workbook(io.BytesIO(contenido), data_only=True, read_only=True)
+    lineas = []
+    for hoja in libro.worksheets:
+        lineas.append(f"--- Hoja: {hoja.title} ---")
+        for fila in hoja.iter_rows(values_only=True):
+            celdas = [str(valor) for valor in fila if valor is not None]
+            if celdas:
+                lineas.append("\t".join(celdas))
+    return "\n".join(lineas)
 
 
 def texto_a_estructura(client: Anthropic, texto: str) -> ContribuyenteExogena:
