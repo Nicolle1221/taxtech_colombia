@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from auditor_ia import generar_reporte_auditoria
 from extractor_local import ContribuyenteExogena
 from motor_fiscal import depurar_cedula_general
 
@@ -31,10 +32,12 @@ class CalcularRentaResponse(BaseModel):
     beneficio_compras_factura_electronica: float
     renta_exenta_fuerza_publica: float
     beneficio_gmf: float
+    tope_art336: float
     subtotal_topeado_art336: float
     renta_liquida_gravable: float
     impuesto_uvt: float
     impuesto_pesos: float
+    reporte_auditoria: str
 
 
 @app.post("/api/v1/calcular-renta", response_model=CalcularRentaResponse)
@@ -56,4 +59,15 @@ def calcular_renta(request: CalcularRentaRequest) -> CalcularRentaResponse:
     except KeyError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
-    return CalcularRentaResponse(**resultado.__dict__)
+    try:
+        reporte_auditoria = generar_reporte_auditoria(
+            contribuyente=request.contribuyente,
+            resultado=resultado,
+            ano_gravable=request.ano_gravable,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502, detail=f"No se pudo generar el reporte de auditoría: {exc}"
+        ) from exc
+
+    return CalcularRentaResponse(**resultado.__dict__, reporte_auditoria=reporte_auditoria)

@@ -31,6 +31,7 @@ class ResultadoCedulaGeneral:
     beneficio_compras_factura_electronica: float
     renta_exenta_fuerza_publica: float
     beneficio_gmf: float
+    tope_art336: float
     subtotal_topeado_art336: float
     renta_liquida_gravable: float
     impuesto_uvt: float
@@ -53,13 +54,25 @@ def ingresos_brutos_por_conceptos(
     )
 
 
+def _tramo_art241(renta_liquida_gravable_uvt: float) -> tuple[float, float, float, float]:
+    for limite_inferior, limite_superior, tarifa, base_uvt in TABLA_ART241:
+        if renta_liquida_gravable_uvt <= limite_superior:
+            return limite_inferior, limite_superior, tarifa, base_uvt
+    raise ValueError("Renta líquida gravable fuera de los rangos del Art. 241")
+
+
 def impuesto_art241(renta_liquida_gravable_uvt: float) -> float:
     if renta_liquida_gravable_uvt <= 0:
         return 0.0
-    for limite_inferior, limite_superior, tarifa, base_uvt in TABLA_ART241:
-        if renta_liquida_gravable_uvt <= limite_superior:
-            return base_uvt + (renta_liquida_gravable_uvt - limite_inferior) * tarifa
-    raise ValueError("Renta líquida gravable fuera de los rangos del Art. 241")
+    limite_inferior, _, tarifa, base_uvt = _tramo_art241(renta_liquida_gravable_uvt)
+    return base_uvt + (renta_liquida_gravable_uvt - limite_inferior) * tarifa
+
+
+def tarifa_marginal_art241(renta_liquida_gravable_uvt: float) -> float:
+    if renta_liquida_gravable_uvt <= 0:
+        return 0.0
+    _, _, tarifa, _ = _tramo_art241(renta_liquida_gravable_uvt)
+    return tarifa
 
 
 def renta_exenta_laboral_25(ingresos_brutos_laborales: float, ano_gravable: int) -> float:
@@ -115,12 +128,9 @@ def beneficio_gmf(gmf_pagado_anual: float) -> float:
     return gmf_pagado_anual * GMF_PORCENTAJE_DEDUCIBLE
 
 
-def limite_general_art336(
-    subtotal_exentas_deducciones: float, ingresos_netos: float, ano_gravable: int
-) -> float:
+def tope_art336(ingresos_netos: float, ano_gravable: int) -> float:
     uvt = valor_uvt(ano_gravable)
-    tope = min(ingresos_netos * LIMITE_GENERAL_ART336_PORCENTAJE, LIMITE_GENERAL_ART336_TOPE_UVT * uvt)
-    return min(subtotal_exentas_deducciones, tope)
+    return min(ingresos_netos * LIMITE_GENERAL_ART336_PORCENTAJE, LIMITE_GENERAL_ART336_TOPE_UVT * uvt)
 
 
 def depurar_cedula_general(
@@ -156,9 +166,8 @@ def depurar_cedula_general(
     )
 
     subtotal_dentro_tope = ded_medicina + ded_intereses + ded_dependientes + renta_exenta
-    subtotal_topeado = limite_general_art336(
-        subtotal_dentro_tope, ingresos_brutos_laborales, ano_gravable
-    )
+    tope_336 = tope_art336(ingresos_brutos_laborales, ano_gravable)
+    subtotal_topeado = min(subtotal_dentro_tope, tope_336)
 
     beneficio_dependientes = beneficio_dependientes_ley2277(num_dependientes, ano_gravable)
     beneficio_facturacion = beneficio_compras_factura_electronica(
@@ -191,6 +200,7 @@ def depurar_cedula_general(
         beneficio_compras_factura_electronica=beneficio_facturacion,
         renta_exenta_fuerza_publica=renta_exenta_militar,
         beneficio_gmf=beneficio_gmf_valor,
+        tope_art336=tope_336,
         subtotal_topeado_art336=subtotal_topeado,
         renta_liquida_gravable=renta_liquida_gravable,
         impuesto_uvt=impuesto_uvt,
