@@ -7,6 +7,7 @@ from config.tabla_art241 import (
     DEPENDIENTES_ART387_TOPE_UVT_MES,
     DEPENDIENTES_LEY2277_MAX_DEPENDIENTES,
     DEPENDIENTES_LEY2277_UVT_POR_DEPENDIENTE,
+    GMF_PORCENTAJE_DEDUCIBLE,
     INTERESES_VIVIENDA_TOPE_UVT_ANIO,
     LIMITE_GENERAL_ART336_PORCENTAJE,
     LIMITE_GENERAL_ART336_TOPE_UVT,
@@ -28,6 +29,8 @@ class ResultadoCedulaGeneral:
     deduccion_dependientes_art387: float
     beneficio_dependientes_ley2277: float
     beneficio_compras_factura_electronica: float
+    renta_exenta_fuerza_publica: float
+    beneficio_gmf: float
     subtotal_topeado_art336: float
     renta_liquida_gravable: float
     impuesto_uvt: float
@@ -104,6 +107,14 @@ def beneficio_compras_factura_electronica(
     return min(valor_compras_factura_electronica * 0.01, tope)
 
 
+def renta_exenta_fuerza_publica(exceso_salario_basico: float) -> float:
+    return max(0.0, exceso_salario_basico)
+
+
+def beneficio_gmf(gmf_pagado_anual: float) -> float:
+    return gmf_pagado_anual * GMF_PORCENTAJE_DEDUCIBLE
+
+
 def limite_general_art336(
     subtotal_exentas_deducciones: float, ingresos_netos: float, ano_gravable: int
 ) -> float:
@@ -121,12 +132,19 @@ def depurar_cedula_general(
     ingresos_brutos_laborales_mensuales: Iterable[float] = (),
     num_dependientes: int = 0,
     valor_compras_factura_electronica: float = 0.0,
+    aplica_renta_exenta_laboral_25: bool = True,
+    exceso_salario_basico_fuerza_publica: float = 0.0,
+    gmf_pagado_anual: float = 0.0,
 ) -> ResultadoCedulaGeneral:
     ingresos_brutos_laborales = ingresos_brutos_por_conceptos(
         contribuyente, conceptos_ingresos_laborales
     )
 
-    renta_exenta = renta_exenta_laboral_25(ingresos_brutos_laborales, ano_gravable)
+    renta_exenta = (
+        renta_exenta_laboral_25(ingresos_brutos_laborales, ano_gravable)
+        if aplica_renta_exenta_laboral_25
+        else 0.0
+    )
     ded_medicina = deduccion_medicina_prepagada(
         pagos_medicina_prepagada_mensuales, ano_gravable
     )
@@ -146,13 +164,17 @@ def depurar_cedula_general(
     beneficio_facturacion = beneficio_compras_factura_electronica(
         valor_compras_factura_electronica, ano_gravable
     )
+    renta_exenta_militar = renta_exenta_fuerza_publica(exceso_salario_basico_fuerza_publica)
+    beneficio_gmf_valor = beneficio_gmf(gmf_pagado_anual)
 
     renta_liquida_gravable = max(
         0.0,
         ingresos_brutos_laborales
         - subtotal_topeado
         - beneficio_dependientes
-        - beneficio_facturacion,
+        - beneficio_facturacion
+        - renta_exenta_militar
+        - beneficio_gmf_valor,
     )
 
     uvt = valor_uvt(ano_gravable)
@@ -167,6 +189,8 @@ def depurar_cedula_general(
         deduccion_dependientes_art387=ded_dependientes,
         beneficio_dependientes_ley2277=beneficio_dependientes,
         beneficio_compras_factura_electronica=beneficio_facturacion,
+        renta_exenta_fuerza_publica=renta_exenta_militar,
+        beneficio_gmf=beneficio_gmf_valor,
         subtotal_topeado_art336=subtotal_topeado,
         renta_liquida_gravable=renta_liquida_gravable,
         impuesto_uvt=impuesto_uvt,
