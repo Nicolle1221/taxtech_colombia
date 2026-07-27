@@ -1,0 +1,7 @@
+src/*.py
+config/
+tests/
+documentos/
+requirements.txt
+Procfile
+prompt_rules.md
