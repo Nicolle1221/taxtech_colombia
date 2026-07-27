@@ -12,6 +12,21 @@ from supabase import create_client
 PDF_PATH = Path("documentos/exogena_ejemplo.pdf")
 MODEL = "claude-sonnet-5"
 
+SYSTEM_PROMPT_EXTRACCION = (
+    "Eres un experto en información exógena de la DIAN (Colombia). El texto de entrada "
+    "puede venir de un PDF nativo, de un PDF escaneado/generado a partir de una hoja de "
+    "Excel exportada desde el portal de la DIAN, o de texto copiado y pegado directamente "
+    "de Excel. En esos casos las filas y columnas pueden llegar desalineadas, con "
+    "tabulaciones o espacios irregulares, celdas partidas en varias líneas, o encabezados "
+    "repetidos. Ignora ese ruido de formato y mapea los campos por su significado, no por "
+    "su posición exacta en la línea:\n"
+    "- 'concepto': el código numérico del concepto de la DIAN (ej. 5001).\n"
+    "- 'valor_ingreso': el valor del pago o ingreso reportado por el tercero.\n"
+    "- 'valor_retencion': el valor de la retención en la fuente asociada a ese concepto.\n"
+    "Si un valor numérico no aparece explícitamente para un registro, usa 0 en vez de "
+    "inventar una cifra."
+)
+
 
 class DatoFiscal(BaseModel):
     concepto: str
@@ -41,10 +56,18 @@ def extraer_texto_pdf_bytes(contenido: bytes) -> str:
     return _texto_de_reader(PdfReader(io.BytesIO(contenido)))
 
 
+def leer_texto_plano(contenido: bytes) -> str:
+    try:
+        return contenido.decode("utf-8")
+    except UnicodeDecodeError:
+        return contenido.decode("latin-1")
+
+
 def texto_a_estructura(client: Anthropic, texto: str) -> ContribuyenteExogena:
     response = client.messages.create(
         model=MODEL,
         max_tokens=2048,
+        system=SYSTEM_PROMPT_EXTRACCION,
         tools=[
             {
                 "name": "registrar_contribuyente_exogena",

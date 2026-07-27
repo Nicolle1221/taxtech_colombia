@@ -6,7 +6,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from auditor_ia import generar_reporte_auditoria
-from extractor_local import ContribuyenteExogena, extraer_texto_pdf_bytes, texto_a_estructura
+from extractor_local import (
+    ContribuyenteExogena,
+    extraer_texto_pdf_bytes,
+    leer_texto_plano,
+    texto_a_estructura,
+)
 from guardar_reporte import guardar_reporte_contribuyente
 from motor_fiscal import depurar_cedula_general
 
@@ -143,14 +148,20 @@ async def procesar_pdf(
     exceso_salario_basico_fuerza_publica: float = Form(0.0),
     gmf_pagado_anual: float = Form(0.0),
 ) -> CalcularRentaResponse:
-    if archivo.content_type != "application/pdf":
-        raise HTTPException(status_code=400, detail="El archivo debe ser un PDF")
+    nombre_archivo = (archivo.filename or "").lower()
+    es_pdf = nombre_archivo.endswith(".pdf") or archivo.content_type == "application/pdf"
+    es_txt = nombre_archivo.endswith(".txt") or archivo.content_type == "text/plain"
+
+    if not es_pdf and not es_txt:
+        raise HTTPException(
+            status_code=400, detail="El archivo debe ser un PDF o un archivo de texto plano (.txt)"
+        )
 
     contenido = await archivo.read()
     try:
-        texto = extraer_texto_pdf_bytes(contenido)
+        texto = leer_texto_plano(contenido) if es_txt else extraer_texto_pdf_bytes(contenido)
     except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"No se pudo leer el PDF: {exc}") from exc
+        raise HTTPException(status_code=400, detail=f"No se pudo leer el archivo: {exc}") from exc
 
     try:
         contribuyente = texto_a_estructura(Anthropic(), texto)

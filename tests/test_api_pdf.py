@@ -58,11 +58,44 @@ def test_procesar_pdf_end_to_end(monkeypatch):
     assert "Alertas de Coherencia" in cuerpo["reporte_auditoria"]
 
 
-def test_procesar_pdf_rechaza_archivos_no_pdf():
+def test_procesar_pdf_rechaza_archivos_no_soportados():
     client = TestClient(main.app)
     respuesta = client.post(
         "/api/v1/procesar-pdf",
-        files={"archivo": ("nota.txt", b"hola", "text/plain")},
+        files={"archivo": ("nota.docx", b"hola", "application/octet-stream")},
         data={"ano_gravable": "2025", "conceptos_ingresos_laborales": "5001"},
     )
     assert respuesta.status_code == 400
+
+
+def test_procesar_txt_end_to_end(monkeypatch):
+    texto_recibido = {}
+
+    def contribuyente_fake_capturando_texto(anthropic_client, texto):
+        texto_recibido["valor"] = texto
+        return _contribuyente_fake(anthropic_client, texto)
+
+    monkeypatch.setattr(main, "texto_a_estructura", contribuyente_fake_capturando_texto)
+    monkeypatch.setattr(
+        main,
+        "generar_reporte_auditoria",
+        lambda contribuyente, resultado, ano_gravable: "## Alertas de Coherencia\nOK\n",
+    )
+    monkeypatch.setattr(main, "guardar_reporte_contribuyente", lambda *a, **k: None)
+
+    texto_plano = (
+        "AÑO GRAVABLE: 2025\nCONTRIBUYENTE: MARTHA CECILIA HERNANDEZ\n"
+        "Formato 1001   BANCOLOMBIA S.A.   NIT 890903938\n"
+        "Concepto 5001    Salarios    Valor 84500000    Retencion 3200000\n"
+    )
+
+    client = TestClient(main.app)
+    respuesta = client.post(
+        "/api/v1/procesar-pdf",
+        files={"archivo": ("exogena_martha.txt", texto_plano.encode("utf-8"), "text/plain")},
+        data={"ano_gravable": "2025", "conceptos_ingresos_laborales": "5001"},
+    )
+
+    assert respuesta.status_code == 200
+    assert texto_recibido["valor"] == texto_plano
+    assert respuesta.json()["ingresos_brutos_laborales"] == 84_500_000.0
