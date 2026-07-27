@@ -1,8 +1,11 @@
-from fastapi import FastAPI, HTTPException
+import sys
+
+from fastapi import BackgroundTasks, FastAPI, HTTPException
 from pydantic import BaseModel
 
 from auditor_ia import generar_reporte_auditoria
 from extractor_local import ContribuyenteExogena
+from guardar_reporte import guardar_reporte_contribuyente
 from motor_fiscal import depurar_cedula_general
 
 app = FastAPI(title="TaxTech Core Colombia")
@@ -40,8 +43,22 @@ class CalcularRentaResponse(BaseModel):
     reporte_auditoria: str
 
 
+def _guardar_reporte_en_segundo_plano(
+    nit: str, nombre: str, resultado_motor_fiscal: dict, reporte_auditoria_markdown: str
+) -> None:
+    try:
+        guardar_reporte_contribuyente(
+            nit, nombre, resultado_motor_fiscal, reporte_auditoria_markdown
+        )
+        print(f"OK: reporte guardado en Supabase para NIT {nit}")
+    except Exception as exc:
+        print(f"ERROR: no se pudo guardar en Supabase para NIT {nit}: {exc}", file=sys.stderr)
+
+
 @app.post("/api/v1/calcular-renta", response_model=CalcularRentaResponse)
-def calcular_renta(request: CalcularRentaRequest) -> CalcularRentaResponse:
+def calcular_renta(
+    request: CalcularRentaRequest, background_tasks: BackgroundTasks
+) -> CalcularRentaResponse:
     try:
         resultado = depurar_cedula_general(
             contribuyente=request.contribuyente,
@@ -69,5 +86,13 @@ def calcular_renta(request: CalcularRentaRequest) -> CalcularRentaResponse:
         raise HTTPException(
             status_code=502, detail=f"No se pudo generar el reporte de auditoría: {exc}"
         ) from exc
+
+    background_tasks.add_task(
+        _guardar_reporte_en_segundo_plano,
+        request.contribuyente.nit,
+        request.contribuyente.nombre,
+        resultado.__dict__,
+        reporte_auditoria,
+    )
 
     return CalcularRentaResponse(**resultado.__dict__, reporte_auditoria=reporte_auditoria)
