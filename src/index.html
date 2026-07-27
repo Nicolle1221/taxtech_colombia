@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="es" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TaxTech Core Colombia</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+          mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+        },
+      },
+    },
+  };
+</script>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<style>
+  body {
+    background:
+      radial-gradient(circle at 15% 0%, rgba(16, 185, 129, 0.08), transparent 40%),
+      radial-gradient(circle at 85% 20%, rgba(59, 130, 246, 0.06), transparent 45%),
+      #060608;
+  }
+  .glass {
+    background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015));
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(16px);
+  }
+  .glass-strong {
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.10);
+    backdrop-filter: blur(20px);
+  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); border-radius: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  [x-cloak] { display: none !important; }
+</style>
+</head>
+
+<body class="min-h-screen bg-[#060608] text-neutral-200 font-sans antialiased">
+
+<div class="flex min-h-screen">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="hidden lg:flex w-[264px] shrink-0 flex-col justify-between border-r border-white/[0.06] px-5 py-6">
+    <div class="space-y-10">
+      <!-- Logo -->
+      <div class="flex items-center gap-2.5 px-1">
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/20">
+          <i data-lucide="scan-line" class="h-4.5 w-4.5 text-black" style="width:18px;height:18px"></i>
+        </div>
+        <div class="leading-none">
+          <p class="text-[13.5px] font-semibold tracking-tight text-white">TaxTech Core</p>
+          <p class="text-[11px] text-neutral-500 tracking-wide">COLOMBIA</p>
+        </div>
+      </div>
+
+      <!-- Nav -->
+      <nav class="space-y-0.5">
+        <p class="px-3 pb-2 text-[10.5px] font-medium uppercase tracking-wider text-neutral-600">Workspace</p>
+        <a href="#" class="flex items-center gap-2.5 rounded-lg bg-white/[0.06] px-3 py-2 text-[13px] font-medium text-white">
+          <i data-lucide="layout-dashboard" style="width:15px;height:15px"></i> Panel de auditoría
+        </a>
+        <a href="#" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-neutral-400 hover:bg-white/[0.04] hover:text-neutral-200 transition-colors">
+          <i data-lucide="users" style="width:15px;height:15px"></i> Contribuyentes
+        </a>
+        <a href="#" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-neutral-400 hover:bg-white/[0.04] hover:text-neutral-200 transition-colors">
+          <i data-lucide="scale" style="width:15px;height:15px"></i> Cédula General
+        </a>
+        <a href="#" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] text-neutral-400 hover:bg-white/[0.04] hover:text-neutral-200 transition-colors">
+          <i data-lucide="settings-2" style="width:15px;height:15px"></i> Configuración
+        </a>
+      </nav>
+    </div>
+
+    <div class="space-y-3">
+      <!-- Supabase status -->
+      <div class="glass flex items-center gap-2.5 rounded-xl px-3 py-2.5">
+        <span class="relative flex h-2 w-2">
+          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
+          <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
+        </span>
+        <div class="leading-none">
+          <p class="text-[12px] font-medium text-neutral-200">Supabase</p>
+          <p class="text-[10.5px] text-neutral-500">contribuyentes_exogena · sync</p>
+        </div>
+      </div>
+
+      <!-- User profile -->
+      <div class="flex items-center gap-2.5 rounded-xl px-2.5 py-2 hover:bg-white/[0.04] transition-colors cursor-pointer">
+        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-800 text-[12px] font-semibold text-neutral-300 ring-1 ring-white/10">
+          JD
+        </div>
+        <div class="min-w-0 flex-1 leading-none">
+          <p class="truncate text-[12.5px] font-medium text-neutral-200">Juan David Marín</p>
+          <p class="truncate text-[10.5px] text-neutral-500">dmr.sas7@gmail.com</p>
+        </div>
+        <i data-lucide="chevron-right" class="text-neutral-600" style="width:14px;height:14px"></i>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="flex-1 px-6 py-7 lg:px-10 lg:py-9 max-w-[1400px] mx-auto w-full">
+
+    <header class="mb-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-[22px] font-semibold tracking-tight text-white">Auditoría de Renta · Cédula General</h1>
+        <p class="mt-1 text-[13px] text-neutral-500">Formulario 210 · Año gravable 2025</p>
+      </div>
+      <div class="hidden sm:flex items-center gap-2 rounded-full glass px-3.5 py-1.5 text-[12px] text-neutral-400">
+        <i data-lucide="shield-check" class="text-emerald-400" style="width:14px;height:14px"></i>
+        Cómputo determinista verificado
+      </div>
+    </header>
+
+    <div x-data="dropzone()" class="space-y-8">
+
+      <!-- ===================== DROPZONE ===================== -->
+      <section
+        @dragover.prevent="dragging = true"
+        @dragenter.prevent="dragging = true"
+        @dragleave.prevent="dragging = false"
+        @drop.prevent="onDrop($event)"
+        :class="dragging
+          ? 'border-emerald-400/50 bg-emerald-400/[0.04] scale-[1.002]'
+          : 'border-white/10 hover:border-white/20'"
+        class="relative rounded-2xl border border-dashed px-8 py-12 text-center transition-all duration-200 glass"
+      >
+        <input type="file" accept="application/pdf" class="hidden" x-ref="fileInput" @change="onFileSelected($event)" />
+
+        <template x-if="!fileName">
+          <div class="flex flex-col items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl glass-strong"
+                 :class="dragging && 'ring-1 ring-emerald-400/40'">
+              <i data-lucide="upload-cloud" class="text-neutral-300" style="width:22px;height:22px"></i>
+            </div>
+            <p class="text-[14.5px] font-medium text-neutral-200">
+              Arrastra el reporte de exógena de la DIAN
+            </p>
+            <p class="text-[12.5px] text-neutral-500">
+              o
+              <button @click="$refs.fileInput.click()" class="font-medium text-emerald-400 hover:text-emerald-300 underline underline-offset-2">
+                selecciona un archivo PDF
+              </button>
+            </p>
+          </div>
+        </template>
+
+        <template x-if="fileName">
+          <div class="flex flex-col items-center gap-3" x-cloak>
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-400/10 ring-1 ring-emerald-400/30">
+              <i data-lucide="file-check-2" class="text-emerald-400" style="width:22px;height:22px"></i>
+            </div>
+            <p class="text-[14.5px] font-medium text-neutral-100" x-text="fileName"></p>
+            <p class="text-[12px] text-neutral-500">Listo para procesar con el motor fiscal</p>
+
+            <button @click="mostrarAjustes = !mostrarAjustes" class="mt-1 flex items-center gap-1 text-[11.5px] text-neutral-500 hover:text-neutral-300 transition-colors">
+              <i data-lucide="sliders-horizontal" style="width:12px;height:12px"></i>
+              <span x-text="mostrarAjustes ? 'Ocultar datos de deducciones' : 'Ajustar datos de deducciones'"></span>
+            </button>
+
+            <div x-show="mostrarAjustes" x-cloak x-transition
+                 class="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2.5 rounded-xl glass-strong p-4 text-left w-full max-w-xl">
+              <label class="text-[11px] text-neutral-500">Año gravable
+                <input type="number" x-model.number="form.ano_gravable" class="mt-1 w-full rounded-md bg-white/[0.04] border border-white/10 px-2 py-1 text-[12.5px] text-neutral-100 focus:outline-none focus:border-emerald-400/40" />
+              </label>
+              <label class="text-[11px] text-neutral-500">Conceptos laborales
+                <input type="text" x-model="form.conceptos_ingresos_laborales" class="mt-1 w-full rounded-md bg-white/[0.04] border border-white/10 px-2 py-1 text-[12.5px] text-neutral-100 focus:outline-none focus:border-emerald-400/40" />
+              </label>
+              <label class="text-[11px] text-neutral-500">Dependientes
+                <input type="number" x-model.number="form.num_dependientes" class="mt-1 w-full rounded-md bg-white/[0.04] border border-white/10 px-2 py-1 text-[12.5px] text-neutral-100 focus:outline-none focus:border-emerald-400/40" />
+              </label>
+              <label class="text-[11px] text-neutral-500">Ingreso mensual prom.
+                <input type="number" x-model.number="form.ingreso_mensual_promedio" class="mt-1 w-full rounded-md bg-white/[0.04] border border-white/10 px-2 py-1 text-[12.5px] text-neutral-100 focus:outline-none focus:border-emerald-400/40" />
+              </label>
+              <label class="text-[11px] text-neutral-500">Medicina prepagada/mes
+                <input type="number" x-model.number="form.medicina_prepagada_mensual" class="mt-1 w-full rounded-md bg-white/[0.04] border border-white/10 px-2 py-1 text-[12.5px] text-neutral-100 focus:outline-none focus:border-emerald-400/40" />
+              </label>
+              <label class="text-[11px] text-neutral-500">Intereses vivienda/año
+                <input type="number" x-model.number="form.intereses_vivienda_pagados_anual" class="mt-1 w-full rounded-md bg-white/[0.04] border border-white/10 px-2 py-1 text-[12.5px] text-neutral-100 focus:outline-none focus:border-emerald-400/40" />
+              </label>
+              <label class="text-[11px] text-neutral-500">Compras factura elec.
+                <input type="number" x-model.number="form.valor_compras_factura_electronica" class="mt-1 w-full rounded-md bg-white/[0.04] border border-white/10 px-2 py-1 text-[12.5px] text-neutral-100 focus:outline-none focus:border-emerald-400/40" />
+              </label>
+              <label class="text-[11px] text-neutral-500">GMF pagado/año
+                <input type="number" x-model.number="form.gmf_pagado_anual" class="mt-1 w-full rounded-md bg-white/[0.04] border border-white/10 px-2 py-1 text-[12.5px] text-neutral-100 focus:outline-none focus:border-emerald-400/40" />
+              </label>
+              <label class="text-[11px] text-neutral-500">Exceso sal. básico (F.P.)
+                <input type="number" x-model.number="form.exceso_salario_basico_fuerza_publica" class="mt-1 w-full rounded-md bg-white/[0.04] border border-white/10 px-2 py-1 text-[12.5px] text-neutral-100 focus:outline-none focus:border-emerald-400/40" />
+              </label>
+              <label class="col-span-2 sm:col-span-3 flex items-center gap-2 text-[11.5px] text-neutral-400 pt-1">
+                <input type="checkbox" x-model="form.aplica_renta_exenta_laboral_25" class="rounded border-white/20 bg-white/[0.04] text-emerald-500 focus:ring-emerald-400/40" />
+                Aplica el 25% de renta exenta laboral (no marcar para contratistas / rentas no laborales)
+              </label>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1">
+              <button @click="procesar()" :disabled="procesando"
+                class="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-1.5 text-[12.5px] font-medium text-black hover:bg-emerald-400 disabled:opacity-60 transition-colors">
+                <svg x-show="procesando" class="h-3.5 w-3.5 animate-spin text-black" viewBox="0 0 24 24" fill="none">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                <span x-show="!procesando">Procesar declaración</span>
+                <span x-show="procesando" x-text="pasoActual"></span>
+              </button>
+              <button @click="reset()" :disabled="procesando" class="rounded-lg px-3 py-1.5 text-[12.5px] text-neutral-400 hover:text-neutral-200 disabled:opacity-40 transition-colors">
+                Quitar
+              </button>
+            </div>
+          </div>
+        </template>
+      </section>
+
+      <template x-if="error">
+        <div class="flex items-start gap-2.5 rounded-xl border border-red-400/25 bg-red-400/[0.06] px-4 py-3 text-[12.5px] text-red-300" x-cloak>
+          <i data-lucide="alert-triangle" class="mt-0.5 shrink-0" style="width:14px;height:14px"></i>
+          <span x-text="error"></span>
+        </div>
+      </template>
+
+      <!-- ===================== RESULTADOS FINANCIEROS ===================== -->
+      <section>
+        <div class="mb-3.5 flex items-center justify-between">
+          <h2 class="text-[13px] font-medium uppercase tracking-wider text-neutral-500">Resultado · Formulario 210</h2>
+          <span class="text-[11.5px] text-neutral-600 font-mono" x-text="resultado ? `${resultado.nombre} · NIT ${resultado.nit}` : '—'"></span>
+        </div>
+
+        <template x-if="!resultado">
+          <div class="glass rounded-2xl px-6 py-10 text-center">
+            <p class="text-[13px] text-neutral-500">Aún no hay resultados. Sube y procesa un PDF de exógena para ver el Formulario 210 calculado.</p>
+          </div>
+        </template>
+
+        <template x-if="resultado">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+
+          <div class="glass rounded-2xl p-5 hover:border-white/[0.14] transition-colors">
+            <div class="flex items-center justify-between mb-6">
+              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05]">
+                <i data-lucide="landmark" class="text-neutral-400" style="width:15px;height:15px"></i>
+              </span>
+              <span class="text-[10.5px] text-neutral-600 font-mono">SECCIÓN 1</span>
+            </div>
+            <p class="text-[12px] text-neutral-500 mb-1.5">Patrimonio Bruto</p>
+            <p class="text-[26px] font-semibold tracking-tight text-neutral-600">—</p>
+            <p class="mt-1.5 text-[11.5px] text-neutral-600">No calculado por el motor (fuera de alcance)</p>
+          </div>
+
+          <div class="glass rounded-2xl p-5 hover:border-white/[0.14] transition-colors">
+            <div class="flex items-center justify-between mb-6">
+              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05]">
+                <i data-lucide="wallet" class="text-neutral-400" style="width:15px;height:15px"></i>
+              </span>
+              <span class="text-[10.5px] text-neutral-600 font-mono">CÉDULA GENERAL</span>
+            </div>
+            <p class="text-[12px] text-neutral-500 mb-1.5">Ingresos Cedulares</p>
+            <p class="text-[26px] font-semibold tracking-tight text-white" x-text="fmt(resultado.ingresos_brutos_laborales)"></p>
+            <p class="mt-1.5 text-[11.5px] text-emerald-400/80">Art. 336 E.T.</p>
+          </div>
+
+          <div class="glass rounded-2xl p-5 hover:border-white/[0.14] transition-colors">
+            <div class="flex items-center justify-between mb-6">
+              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.05]">
+                <i data-lucide="minus-circle" class="text-neutral-400" style="width:15px;height:15px"></i>
+              </span>
+              <span class="text-[10.5px] text-neutral-600 font-mono">TOPE 40% · 1.340 UVT</span>
+            </div>
+            <p class="text-[12px] text-neutral-500 mb-1.5">Total Deducciones</p>
+            <p class="text-[26px] font-semibold tracking-tight text-white" x-text="fmt(totalDeducciones())"></p>
+            <p class="mt-1.5 text-[11.5px]" :class="topeSaturado() ? 'text-orange-400/80' : 'text-neutral-600'"
+               x-text="topeSaturado() ? 'Tope saturado' : 'Dentro del margen disponible'"></p>
+          </div>
+
+          <div class="glass-strong rounded-2xl p-5 ring-1 ring-emerald-400/15">
+            <div class="flex items-center justify-between mb-6">
+              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-400/10">
+                <i data-lucide="receipt" class="text-emerald-400" style="width:15px;height:15px"></i>
+              </span>
+              <span class="text-[10.5px] text-neutral-600 font-mono">ART. 241 E.T.</span>
+            </div>
+            <p class="text-[12px] text-neutral-500 mb-1.5">Impuesto sobre Renta Líquida</p>
+            <p class="text-[26px] font-semibold tracking-tight text-white" x-text="fmt(resultado.impuesto_pesos)"></p>
+            <p class="mt-1.5 text-[11.5px] text-neutral-600">Renta líquida: <span x-text="fmt(resultado.renta_liquida_gravable)"></span></p>
+          </div>
+
+        </div>
+        </template>
+      </section>
+
+      <!-- ===================== AUDITORÍA IA ===================== -->
+      <section>
+        <div class="mb-3.5 flex items-center gap-2">
+          <i data-lucide="sparkles" class="text-emerald-400" style="width:15px;height:15px"></i>
+          <h2 class="text-[13px] font-medium uppercase tracking-wider text-neutral-500">Auditoría avanzada · Agente IA</h2>
+        </div>
+
+        <template x-if="!reporte">
+          <div class="glass rounded-2xl px-6 py-10 text-center">
+            <p class="text-[13px] text-neutral-500">El reporte del agente auditor aparecerá aquí después de procesar una declaración.</p>
+          </div>
+        </template>
+
+        <template x-if="reporte">
+          <div class="glass rounded-2xl p-6 lg:p-8 space-y-6" x-html="renderReporte(reporte)"></div>
+        </template>
+      </section>
+
+      <footer class="pt-4 pb-2 text-center text-[11px] text-neutral-700">
+        Cómputo fiscal 100% determinista · el modelo de IA solo redacta, nunca calcula.
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<script>
+const API_BASE_URL = 'http://127.0.0.1:8000';
+
+function dropzone() {
+  return {
+    dragging: false,
+    fileObj: null,
+    fileName: null,
+    procesando: false,
+    pasoActual: 'Procesando…',
+    error: null,
+    mostrarAjustes: false,
+    resultado: null,
+    reporte: null,
+    form: {
+      ano_gravable: 2025,
+      conceptos_ingresos_laborales: '5001',
+      num_dependientes: 0,
+      ingreso_mensual_promedio: 0,
+      medicina_prepagada_mensual: 0,
+      intereses_vivienda_pagados_anual: 0,
+      valor_compras_factura_electronica: 0,
+      gmf_pagado_anual: 0,
+      exceso_salario_basico_fuerza_publica: 0,
+      aplica_renta_exenta_laboral_25: true,
+    },
+
+    onDrop(e) {
+      this.dragging = false;
+      const file = e.dataTransfer.files?.[0];
+      if (file && file.type === 'application/pdf') this.setFile(file);
+    },
+    onFileSelected(e) {
+      const file = e.target.files?.[0];
+      if (file) this.setFile(file);
+    },
+    refreshIcons() {
+      this.$nextTick(() => lucide.createIcons());
+    },
+    setFile(file) {
+      this.fileObj = file;
+      this.fileName = file.name;
+      this.error = null;
+      this.refreshIcons();
+    },
+    reset() {
+      this.fileObj = null;
+      this.fileName = null;
+      this.error = null;
+      this.refreshIcons();
+    },
+
+    async procesar() {
+      if (!this.fileObj || this.procesando) return;
+      this.procesando = true;
+      this.error = null;
+      this.pasoActual = 'Extrayendo PDF y calculando…';
+
+      const datos = new FormData();
+      datos.append('archivo', this.fileObj);
+      datos.append('ano_gravable', String(this.form.ano_gravable));
+      datos.append('conceptos_ingresos_laborales', this.form.conceptos_ingresos_laborales);
+      datos.append('num_dependientes', String(this.form.num_dependientes));
+      datos.append('pagos_medicina_prepagada_mensuales', Array(12).fill(this.form.medicina_prepagada_mensual).join(','));
+      datos.append('ingresos_brutos_laborales_mensuales', Array(12).fill(this.form.ingreso_mensual_promedio).join(','));
+      datos.append('intereses_vivienda_pagados_anual', String(this.form.intereses_vivienda_pagados_anual));
+      datos.append('valor_compras_factura_electronica', String(this.form.valor_compras_factura_electronica));
+      datos.append('gmf_pagado_anual', String(this.form.gmf_pagado_anual));
+      datos.append('exceso_salario_basico_fuerza_publica', String(this.form.exceso_salario_basico_fuerza_publica));
+      datos.append('aplica_renta_exenta_laboral_25', String(this.form.aplica_renta_exenta_laboral_25));
+
+      try {
+        const respuesta = await fetch(`${API_BASE_URL}/api/v1/procesar-pdf`, { method: 'POST', body: datos });
+        const cuerpo = await respuesta.json();
+
+        if (!respuesta.ok) {
+          this.error = `Error ${respuesta.status}: ${cuerpo.detail ?? 'el backend rechazó la solicitud'}`;
+          return;
+        }
+
+        this.resultado = cuerpo;
+        this.reporte = cuerpo.reporte_auditoria;
+      } catch (err) {
+        this.error = `No se pudo conectar con el backend en ${API_BASE_URL} (¿está corriendo "uvicorn main:app"?): ${err.message}`;
+      } finally {
+        this.procesando = false;
+        this.refreshIcons();
+      }
+    },
+
+    totalDeducciones() {
+      const r = this.resultado;
+      if (!r) return 0;
+      return r.subtotal_topeado_art336 + r.beneficio_dependientes_ley2277
+        + r.beneficio_compras_factura_electronica + r.renta_exenta_fuerza_publica + r.beneficio_gmf;
+    },
+    topeSaturado() {
+      const r = this.resultado;
+      return !!r && r.subtotal_topeado_art336 >= r.tope_art336 - 0.01;
+    },
+    fmt(n) {
+      return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
+    },
+    renderReporte(md) {
+      const lines = md.split('\n');
+      let html = '';
+      let section = null;
+      let inList = false;
+
+      const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
+      const accent = () => section === 'alertas'
+        ? 'border-orange-400/40 text-orange-300'
+        : section === 'plan'
+        ? 'border-emerald-400/40 text-emerald-300'
+        : 'border-white/15 text-neutral-200';
+
+      for (const raw of lines) {
+        const line = raw.trim();
+        if (!line) { closeList(); continue; }
+
+        if (line.startsWith('## ')) {
+          closeList();
+          const title = line.slice(3);
+          section = title.toLowerCase().includes('alerta')
+            ? 'alertas'
+            : title.toLowerCase().includes('optimiz') || title.toLowerCase().includes('planea')
+            ? 'plan'
+            : null;
+          html += `<h3 class="border-l-2 pl-3 text-[13.5px] font-semibold tracking-tight ${accent()}">${title}</h3>`;
+          continue;
+        }
+
+        const bolded = line.replace(/\*\*(.+?)\*\*/g, '<strong class="text-neutral-50 font-semibold">$1</strong>');
+
+        if (line.startsWith('- ')) {
+          if (!inList) { html += '<ul class="mt-2 space-y-1.5 pl-1">'; inList = true; }
+          html += `<li class="flex gap-2 text-[13px] text-neutral-400 leading-relaxed"><span class="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-neutral-600"></span><span>${bolded}</span></li>`;
+          continue;
+        }
+
+        closeList();
+        html += `<p class="text-[13px] text-neutral-400 leading-relaxed">${bolded}</p>`;
+      }
+      closeList();
+      return html;
+    },
+  };
+}
+
+document.addEventListener('DOMContentLoaded', () => lucide.createIcons());
+</script>
+
+</body>
+</html>

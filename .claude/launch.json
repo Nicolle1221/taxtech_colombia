@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "taxtech-api",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "PYTHONPATH=src:. venv/bin/uvicorn main:app --reload --app-dir src --port 8000"],
+      "port": 8000
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import sys
@@ -28,9 +29,16 @@ class ContribuyenteExogena(BaseModel):
     datos_fiscales: list[DatoFiscal]
 
 
-def extraer_texto_pdf(ruta: Path) -> str:
-    reader = PdfReader(str(ruta))
+def _texto_de_reader(reader: PdfReader) -> str:
     return "\n".join(page.extract_text() or "" for page in reader.pages)
+
+
+def extraer_texto_pdf(ruta: Path) -> str:
+    return _texto_de_reader(PdfReader(str(ruta)))
+
+
+def extraer_texto_pdf_bytes(contenido: bytes) -> str:
+    return _texto_de_reader(PdfReader(io.BytesIO(contenido)))
 
 
 def texto_a_estructura(client: Anthropic, texto: str) -> ContribuyenteExogena:
