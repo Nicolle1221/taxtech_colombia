@@ -330,7 +330,7 @@
 </div>
 
 <script>
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://taxtech-colombia-dian.onrender.com';
 
 function dropzone() {
   return {
@@ -412,7 +412,7 @@ function dropzone() {
         this.resultado = cuerpo;
         this.reporte = cuerpo.reporte_auditoria;
       } catch (err) {
-        this.error = `No se pudo conectar con el backend en ${API_BASE_URL} (¿está corriendo "uvicorn main:app"?): ${err.message}`;
+        this.error = `No se pudo conectar con el backend en ${API_BASE_URL} (si es la primera petición en un rato, Render puede tardar ~30-60s en despertar el servicio): ${err.message}`;
       } finally {
         this.procesando = false;
         this.refreshIcons();
