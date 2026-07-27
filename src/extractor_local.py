@@ -28,7 +28,21 @@ SYSTEM_PROMPT_EXTRACCION = (
     "inventar una cifra.\n"
     "El campo 'datos_fiscales' es OBLIGATORIO en tu respuesta: inclúyelo siempre, incluso "
     "si el texto no trae ningún registro identificable de conceptos/valores, en cuyo caso "
-    "debes enviar una lista vacía [] en vez de omitir el campo por completo."
+    "debes enviar una lista vacía [] en vez de omitir el campo por completo.\n\n"
+    "FORMATO 'Consulta de información reportada por terceros' (el reporte consolidado que "
+    "cualquier contribuyente descarga de su cuenta en el portal de la DIAN, distinto de un "
+    "certificado Formato 1001): cada fila trae 'NIT' y 'Nombre/Razón Social' del informante, "
+    "un 'Detalle' con el código de concepto incrustado entre paréntesis (ej. 'Otros ingresos "
+    "(Concepto: 5016)' -> concepto=5016), un único 'Valor', y una clasificación por 'Tope' "
+    "(Tope 1: Ingresos, Tope 2: Patrimonio, Tope 3: Consumos TC, Tope 4: Movimientos/"
+    "Consignaciones, Tope 5: Compras) o una etiqueta 'R30 Deudas'. Este formato NO trae "
+    "retención en la fuente por separado: usa valor_retencion=0 para sus registros. "
+    "Extrae a 'datos_fiscales' ÚNICAMENTE las filas marcadas como 'Tope 1: Ingresos' — son "
+    "las únicas que representan renta gravable. Las filas de Tope 2 (Patrimonio), Tope 3 "
+    "(Consumos TC), Tope 4 (Movimientos/Consignaciones), Tope 5 (Compras) y 'R30 Deudas' NO "
+    "son ingresos: son saldos bancarios, consumos con tarjeta o deudas, y clasificarlas como "
+    "ingreso sería un error grave. Ignóralas para 'datos_fiscales' aunque tengan un valor "
+    "numérico grande."
 )
 
 
