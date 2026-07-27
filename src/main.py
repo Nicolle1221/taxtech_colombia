@@ -178,8 +178,11 @@ async def procesar_pdf(
     try:
         contribuyente = texto_a_estructura(Anthropic(), texto)
     except Exception as exc:
+        print(f"ERROR: fallo de extracción IA para {nombre_archivo}: {exc}", file=sys.stderr)
         raise HTTPException(
-            status_code=502, detail=f"No se pudo extraer la información del PDF: {exc}"
+            status_code=502,
+            detail="No se pudo extraer la información del archivo. Verifica que tenga el "
+            "formato esperado de información exógena de la DIAN e intenta de nuevo.",
         ) from exc
 
     return _calcular_y_auditar(

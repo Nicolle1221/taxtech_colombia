@@ -6,7 +6,7 @@ from pathlib import Path
 
 from anthropic import Anthropic
 from openpyxl import load_workbook
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pypdf import PdfReader
 from supabase import create_client
 
@@ -25,7 +25,10 @@ SYSTEM_PROMPT_EXTRACCION = (
     "- 'valor_ingreso': el valor del pago o ingreso reportado por el tercero.\n"
     "- 'valor_retencion': el valor de la retención en la fuente asociada a ese concepto.\n"
     "Si un valor numérico no aparece explícitamente para un registro, usa 0 en vez de "
-    "inventar una cifra."
+    "inventar una cifra.\n"
+    "El campo 'datos_fiscales' es OBLIGATORIO en tu respuesta: inclúyelo siempre, incluso "
+    "si el texto no trae ningún registro identificable de conceptos/valores, en cuyo caso "
+    "debes enviar una lista vacía [] en vez de omitir el campo por completo."
 )
 
 
@@ -42,7 +45,7 @@ class DatoFiscal(BaseModel):
 class ContribuyenteExogena(BaseModel):
     nit: str
     nombre: str
-    datos_fiscales: list[DatoFiscal]
+    datos_fiscales: list[DatoFiscal] = Field(default_factory=list)
 
 
 def _texto_de_reader(reader: PdfReader) -> str:

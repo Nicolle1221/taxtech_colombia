@@ -103,6 +103,41 @@ def test_procesar_txt_end_to_end(monkeypatch):
     assert respuesta.json()["ingresos_brutos_laborales"] == 84_500_000.0
 
 
+def test_contribuyente_exogena_sin_datos_fiscales_no_crashea():
+    # Reproduce el input_value exacto del error real reportado en producción:
+    # la IA devolvió nit/nombre pero omitió 'datos_fiscales' por completo.
+    contribuyente = ContribuyenteExogena.model_validate(
+        {"nit": "67045050", "nombre": "HERNANDEZ MARTHA CECILIA"}
+    )
+    assert contribuyente.datos_fiscales == []
+
+
+def test_procesar_archivo_sin_registros_no_devuelve_502(monkeypatch):
+    monkeypatch.setattr(
+        main,
+        "texto_a_estructura",
+        lambda anthropic_client, texto: ContribuyenteExogena(
+            nit="67045050", nombre="HERNANDEZ MARTHA CECILIA"
+        ),
+    )
+    monkeypatch.setattr(
+        main,
+        "generar_reporte_auditoria",
+        lambda contribuyente, resultado, ano_gravable: "## Alertas de Coherencia\nOK\n",
+    )
+    monkeypatch.setattr(main, "guardar_reporte_contribuyente", lambda *a, **k: None)
+
+    client = TestClient(main.app)
+    respuesta = client.post(
+        "/api/v1/procesar-pdf",
+        files={"archivo": ("reporteExogena2025-4.txt", b"contenido ambiguo", "text/plain")},
+        data={"ano_gravable": "2025", "conceptos_ingresos_laborales": "5001"},
+    )
+
+    assert respuesta.status_code == 200
+    assert respuesta.json()["ingresos_brutos_laborales"] == 0.0
+
+
 def test_procesar_xlsx_end_to_end(monkeypatch):
     texto_recibido = {}
 

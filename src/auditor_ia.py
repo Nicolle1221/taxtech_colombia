@@ -18,8 +18,16 @@ SYSTEM_PROMPT = (
 )
 
 
-def detectar_alertas_coherencia(resultado: ResultadoCedulaGeneral) -> list[str]:
+def detectar_alertas_coherencia(
+    contribuyente: ContribuyenteExogena, resultado: ResultadoCedulaGeneral
+) -> list[str]:
     alertas = []
+    if not contribuyente.datos_fiscales:
+        alertas.append(
+            "No se identificaron registros de conceptos/valores en el documento cargado. "
+            "Verifica que el archivo tenga el formato esperado de información exógena de "
+            "la DIAN; los resultados de este cálculo no son confiables si no hay datos."
+        )
     sin_ingresos = resultado.ingresos_brutos_laborales == 0
     if sin_ingresos and resultado.deduccion_medicina_prepagada > 0:
         alertas.append(
@@ -83,7 +91,7 @@ def construir_datos_auditoria(
     return {
         "contribuyente": {"nit": contribuyente.nit, "nombre": contribuyente.nombre},
         "resultado_motor_fiscal": resultado.__dict__,
-        "alertas_coherencia": detectar_alertas_coherencia(resultado),
+        "alertas_coherencia": detectar_alertas_coherencia(contribuyente, resultado),
         "oportunidad_optimizacion": calcular_oportunidad_optimizacion(resultado, ano_gravable),
         "sugerencia_planeacion_siguiente_anio": sugerir_aporte_afc_pensiones(
             resultado, ano_gravable
