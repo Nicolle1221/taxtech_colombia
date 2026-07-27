@@ -37,6 +37,7 @@ class CalcularRentaRequest(BaseModel):
     valor_compras_factura_electronica: float = 0.0
     aplica_renta_exenta_laboral_25: bool = True
     exceso_salario_basico_fuerza_publica: float = 0.0
+    gastos_representacion_docente_publico: float = 0.0
     gmf_pagado_anual: float = 0.0
 
 
@@ -51,6 +52,7 @@ class CalcularRentaResponse(BaseModel):
     beneficio_dependientes_ley2277: float
     beneficio_compras_factura_electronica: float
     renta_exenta_fuerza_publica: float
+    renta_exenta_gastos_representacion_docente: float
     beneficio_gmf: float
     tope_art336: float
     subtotal_topeado_art336: float
@@ -130,6 +132,7 @@ def calcular_renta(
         valor_compras_factura_electronica=request.valor_compras_factura_electronica,
         aplica_renta_exenta_laboral_25=request.aplica_renta_exenta_laboral_25,
         exceso_salario_basico_fuerza_publica=request.exceso_salario_basico_fuerza_publica,
+        gastos_representacion_docente_publico=request.gastos_representacion_docente_publico,
         gmf_pagado_anual=request.gmf_pagado_anual,
     )
 
@@ -147,6 +150,7 @@ async def procesar_pdf(
     valor_compras_factura_electronica: float = Form(0.0),
     aplica_renta_exenta_laboral_25: bool = Form(True),
     exceso_salario_basico_fuerza_publica: float = Form(0.0),
+    gastos_representacion_docente_publico: float = Form(0.0),
     gmf_pagado_anual: float = Form(0.0),
 ) -> CalcularRentaResponse:
     nombre_archivo = (archivo.filename or "").lower()
@@ -185,6 +189,16 @@ async def procesar_pdf(
             "formato esperado de información exógena de la DIAN e intenta de nuevo.",
         ) from exc
 
+    # El formulario manda si el usuario lo diligenció explícitamente (valor != 0);
+    # si no, se usa lo que la IA haya identificado en el certificado (Formulario 220).
+    exceso_salario_basico_final = (
+        exceso_salario_basico_fuerza_publica or contribuyente.exceso_salario_basico_fuerza_publica
+    )
+    gastos_representacion_final = (
+        gastos_representacion_docente_publico
+        or contribuyente.gastos_representacion_docente_publico
+    )
+
     return _calcular_y_auditar(
         contribuyente=contribuyente,
         ano_gravable=ano_gravable,
@@ -196,6 +210,7 @@ async def procesar_pdf(
         num_dependientes=num_dependientes,
         valor_compras_factura_electronica=valor_compras_factura_electronica,
         aplica_renta_exenta_laboral_25=aplica_renta_exenta_laboral_25,
-        exceso_salario_basico_fuerza_publica=exceso_salario_basico_fuerza_publica,
+        exceso_salario_basico_fuerza_publica=exceso_salario_basico_final,
+        gastos_representacion_docente_publico=gastos_representacion_final,
         gmf_pagado_anual=gmf_pagado_anual,
     )

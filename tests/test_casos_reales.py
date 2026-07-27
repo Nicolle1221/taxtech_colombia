@@ -75,6 +75,70 @@ def test_caso_b_fuerza_publica_exceso_salario_100_exento():
     assert resultado.impuesto_pesos == pytest.approx(0.0)
 
 
+def test_caso_militar_exceso_1500_uvt_no_se_recorta_por_tope_40_por_ciento():
+    uvt = 49_799
+    exceso_1500_uvt = 1500 * uvt  # 74.698.500 -- supera las 1.340 UVT del tope Art. 336
+
+    contribuyente = ContribuyenteExogena(
+        nit="30405060-3",
+        nombre="OFICIAL FUERZA PUBLICA",
+        datos_fiscales=[
+            {
+                "concepto": "5001",
+                "descripcion_concepto": "Salarios y prestaciones fuerza pública",
+                "nit_informante": "899999061",
+                "razon_social_informante": "MINISTERIO DE DEFENSA NACIONAL",
+                "valor_ingreso": 104_698_500.0,
+                "valor_retencion": 0.0,
+                "ano_gravable": ANO_GRAVABLE,
+            }
+        ],
+    )
+
+    resultado = depurar_cedula_general(
+        contribuyente=contribuyente,
+        ano_gravable=ANO_GRAVABLE,
+        conceptos_ingresos_laborales={"5001"},
+        exceso_salario_basico_fuerza_publica=exceso_1500_uvt,
+    )
+
+    # Parágrafo 4, Art. 206 E.T.: el exceso de salario básico (núm. 8) no está
+    # sujeto al límite del 40%/1.340 UVT del Art. 336 -- debe pasar íntegro.
+    assert resultado.renta_exenta_fuerza_publica == pytest.approx(exceso_1500_uvt)
+    assert exceso_1500_uvt > resultado.tope_art336
+    assert resultado.renta_liquida_gravable == pytest.approx(3_825_375.0)
+
+
+def test_caso_docente_universidad_publica_gastos_representacion_topeados_50_por_ciento():
+    contribuyente = ContribuyenteExogena(
+        nit="40506070-4",
+        nombre="RECTOR UNIVERSIDAD PUBLICA",
+        datos_fiscales=[
+            {
+                "concepto": "5001",
+                "descripcion_concepto": "Salarios",
+                "nit_informante": "899999063",
+                "razon_social_informante": "UNIVERSIDAD NACIONAL DE COLOMBIA",
+                "valor_ingreso": 100_000_000.0,
+                "valor_retencion": 0.0,
+                "ano_gravable": ANO_GRAVABLE,
+            }
+        ],
+    )
+
+    resultado = depurar_cedula_general(
+        contribuyente=contribuyente,
+        ano_gravable=ANO_GRAVABLE,
+        conceptos_ingresos_laborales={"5001"},
+        gastos_representacion_docente_publico=60_000_000.0,
+    )
+
+    # Art. 206 núm. 9 E.T.: exento fuera del tope Art. 336, pero topeado al 50%
+    # del salario -- $60M certificados deben quedar en $50M (no el valor pleno).
+    assert resultado.renta_exenta_gastos_representacion_docente == pytest.approx(50_000_000.0)
+    assert resultado.renta_liquida_gravable == pytest.approx(25_000_000.0)
+
+
 def test_caso_c_contratista_rentas_no_laborales_gmf_y_factura_electronica():
     contribuyente = ContribuyenteExogena(
         nit="30405060-2",

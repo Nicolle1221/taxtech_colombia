@@ -42,7 +42,20 @@ SYSTEM_PROMPT_EXTRACCION = (
     "(Consumos TC), Tope 4 (Movimientos/Consignaciones), Tope 5 (Compras) y 'R30 Deudas' NO "
     "son ingresos: son saldos bancarios, consumos con tarjeta o deudas, y clasificarlas como "
     "ingreso sería un error grave. Ignóralas para 'datos_fiscales' aunque tengan un valor "
-    "numérico grande."
+    "numérico grande.\n\n"
+    "CERTIFICADO DE INGRESOS Y RETENCIONES (Formulario 220): si el documento es de este tipo, "
+    "revisa quién lo emite:\n"
+    "- Si el emisor es una entidad de las Fuerzas Militares o la Policía Nacional de Colombia "
+    "(Ministerio de Defensa, Ejército, Armada, Fuerza Aérea, Policía Nacional, o similar), "
+    "busca el 'exceso de salario básico' certificado (la diferencia entre el salario básico y "
+    "la asignación salarial total, o cualquier rubro explícitamente etiquetado como 'exceso "
+    "de salario básico' o equivalente) y repórtalo en el campo 'exceso_salario_basico_fuerza_"
+    "publica'.\n"
+    "- Si el emisor es una universidad PÚBLICA/oficial/estatal (no privada) y el certificado "
+    "es de un rector o profesor, busca los 'gastos de representación' certificados y repórtalos "
+    "en 'gastos_representacion_docente_publico'.\n"
+    "- Si ninguno de estos dos casos aplica, deja ambos campos en 0. No inventes estos valores "
+    "a partir de otro tipo de certificado o entidad."
 )
 
 
@@ -60,6 +73,8 @@ class ContribuyenteExogena(BaseModel):
     nit: str
     nombre: str
     datos_fiscales: list[DatoFiscal] = Field(default_factory=list)
+    exceso_salario_basico_fuerza_publica: float = 0.0
+    gastos_representacion_docente_publico: float = 0.0
 
 
 def _texto_de_reader(reader: PdfReader) -> str:

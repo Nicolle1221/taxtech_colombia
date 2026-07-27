@@ -7,6 +7,7 @@ from config.tabla_art241 import (
     DEPENDIENTES_ART387_TOPE_UVT_MES,
     DEPENDIENTES_LEY2277_MAX_DEPENDIENTES,
     DEPENDIENTES_LEY2277_UVT_POR_DEPENDIENTE,
+    GASTOS_REPRESENTACION_DOCENTE_PORCENTAJE_TOPE,
     GMF_PORCENTAJE_DEDUCIBLE,
     INTERESES_VIVIENDA_TOPE_UVT_ANIO,
     LIMITE_GENERAL_ART336_PORCENTAJE,
@@ -30,6 +31,7 @@ class ResultadoCedulaGeneral:
     beneficio_dependientes_ley2277: float
     beneficio_compras_factura_electronica: float
     renta_exenta_fuerza_publica: float
+    renta_exenta_gastos_representacion_docente: float
     beneficio_gmf: float
     tope_art336: float
     subtotal_topeado_art336: float
@@ -124,6 +126,13 @@ def renta_exenta_fuerza_publica(exceso_salario_basico: float) -> float:
     return max(0.0, exceso_salario_basico)
 
 
+def renta_exenta_gastos_representacion_docente(
+    gastos_representacion: float, salario_base: float
+) -> float:
+    tope = max(0.0, salario_base) * GASTOS_REPRESENTACION_DOCENTE_PORCENTAJE_TOPE
+    return min(max(0.0, gastos_representacion), tope)
+
+
 def beneficio_gmf(gmf_pagado_anual: float) -> float:
     return gmf_pagado_anual * GMF_PORCENTAJE_DEDUCIBLE
 
@@ -144,6 +153,7 @@ def depurar_cedula_general(
     valor_compras_factura_electronica: float = 0.0,
     aplica_renta_exenta_laboral_25: bool = True,
     exceso_salario_basico_fuerza_publica: float = 0.0,
+    gastos_representacion_docente_publico: float = 0.0,
     gmf_pagado_anual: float = 0.0,
 ) -> ResultadoCedulaGeneral:
     ingresos_brutos_laborales = ingresos_brutos_por_conceptos(
@@ -174,6 +184,9 @@ def depurar_cedula_general(
         valor_compras_factura_electronica, ano_gravable
     )
     renta_exenta_militar = renta_exenta_fuerza_publica(exceso_salario_basico_fuerza_publica)
+    renta_exenta_docente = renta_exenta_gastos_representacion_docente(
+        gastos_representacion_docente_publico, ingresos_brutos_laborales
+    )
     beneficio_gmf_valor = beneficio_gmf(gmf_pagado_anual)
 
     renta_liquida_gravable = max(
@@ -183,6 +196,7 @@ def depurar_cedula_general(
         - beneficio_dependientes
         - beneficio_facturacion
         - renta_exenta_militar
+        - renta_exenta_docente
         - beneficio_gmf_valor,
     )
 
@@ -199,6 +213,7 @@ def depurar_cedula_general(
         beneficio_dependientes_ley2277=beneficio_dependientes,
         beneficio_compras_factura_electronica=beneficio_facturacion,
         renta_exenta_fuerza_publica=renta_exenta_militar,
+        renta_exenta_gastos_representacion_docente=renta_exenta_docente,
         beneficio_gmf=beneficio_gmf_valor,
         tope_art336=tope_336,
         subtotal_topeado_art336=subtotal_topeado,
